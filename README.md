@@ -2,6 +2,8 @@
 
 Personal Banking Tracker Platform
 
+MoneyScope follows a microservices architecture with event-driven communication, designed for scalability and maintainability.
+
 ## Architecture
 - Auth Service (OAuth2 Authorization Server)
 - Transaction Service (Transaction Processing)
