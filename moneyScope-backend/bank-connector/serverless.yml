@@ -1,0 +1,36 @@
+service: moneyscope-bank-connector
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: java17
+  region: us-east-1
+
+functions:
+  webhook:
+    handler: com.moneyscope.bankconnector.WebhookHandler
+    events:
+      - http:
+          path: /webhook
+          method: post
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+  sync:
+    handler: com.moneyscope.bankconnector.SyncHandler
+    events:
+      - schedule:
+          rate: rate(1 hour)
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+plugins:
+  - serverless-offline
+  - serverless-domain-manager
+
+custom:
+  javaOptions:
+    - -Xms256m -Xmx512m
+  java8Options:
+    - -Djava.security.egd=file:/dev/./urandom

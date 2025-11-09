@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: MoneyScope Analytics Service
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 15
+    Runtime: java17
+    MemorySize: 1024
+    Environment:
+      Variables:
+        SPRING_PROFILES_ACTIVE: dev
+
+Resources:
+  DailyAggregationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.moneyscope.analytics.DailyAggregationHandler
+      CodeUri: ./target/analytics.jar
+      Runtime: java17
+      Timeout: 900
+      MemorySize: 1024
+      Environment:
+        Variables:
+          SPRING_PROFILES_ACTIVE: dev
+      Events:
+        Schedule:
+          Rate: cron(0 2 * * ? *)
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+  ReportGenerationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.moneyscope.analytics.ReportGenerationHandler
+      CodeUri: ./target/analytics.jar
+      Runtime: java17
+      Timeout: 300
+      MemorySize: 1024
+      Environment:
+        Variables:
+          SPRING_PROFILES_ACTIVE: dev
+      Events:
+        Schedule:
+          Rate: cron(0 6 * * ? *)
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+Outputs:
+  DailyAggregationFunction:
+    Description: "Daily Aggregation Function ARN"
+    Value:
+      Ref: DailyAggregationFunction
+
+  ReportGenerationFunction:
+    Description: "Report Generation Function ARN"
+    Value:
+      Ref: ReportGenerationFunction

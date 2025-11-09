@@ -1,0 +1,34 @@
+service: moneyscope-analytics
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: java17
+  region: us-east-1
+
+functions:
+  dailyAggregation:
+    handler: com.moneyscope.analytics.DailyAggregationHandler
+    events:
+      - schedule:
+          rate: rate(24 hours)
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+  reportGeneration:
+    handler: com.moneyscope.analytics.ReportGenerationHandler
+    events:
+      - schedule:
+          rate: rate(1 day)
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+plugins:
+  - serverless-offline
+
+custom:
+  javaOptions:
+    - -Xms512m -Xmx1024m
+  java8Options:
+    - -Djava.security.egd=file:/dev/./urandom

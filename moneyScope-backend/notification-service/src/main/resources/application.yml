@@ -1,0 +1,73 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: notification-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/moneyscope_notification
+    username: moneyscope
+    password: password
+    driver-class: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      show-sql: false
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+
+  # AWS Configuration
+  aws:
+    region: us-east-1
+    credentials:
+      access-key: ${AWS_ACCESS_KEY:}
+      secret-key: ${AWS_SECRET_KEY:}
+    dynamodb:
+      endpoint: ${DYNAMODB_ENDPOINT:http://localhost:8000}
+      region: ${AWS_REGION:us-east-1}
+
+  # SES Configuration
+  ses:
+    region: us-east-1
+    from: noreply@moneyscope.com
+
+# Notification Service Configuration
+notification:
+  storage:
+    # DynamoDB for logs and templates
+    logs-table: ${NOTIFICATION_LOGS_TABLE:moneyscope-notification-logs}
+    templates-table: ${NOTIFICATION_TEMPLATES_TABLE:moneyscope-notification-templates}
+    
+    # S3 for static templates
+    templates-bucket: ${NOTIFICATION_TEMPLATES_BUCKET:moneyscope-notification-templates}
+    
+    # Redis for template caching
+    templates-cache-ttl: ${NOTIFICATION_TEMPLATES_CACHE_TTL:3600}
+
+logging:
+  level:
+    com.moneyscope: INFO
+    software.amazon.awssdk: DEBUG

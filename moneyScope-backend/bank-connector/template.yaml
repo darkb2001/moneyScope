@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: MoneyScope Bank Connector Service
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: java17
+    MemorySize: 512
+    Environment:
+      Variables:
+        SPRING_PROFILES_ACTIVE: dev
+
+Resources:
+  WebhookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.moneyscope.bankconnector.WebhookHandler
+      CodeUri: ./target/bank-connector.jar
+      Runtime: java17
+      Timeout: 30
+      MemorySize: 512
+      Environment:
+        Variables:
+          SPRING_PROFILES_ACTIVE: dev
+      Events:
+        Http:
+          Path: /webhook
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+  SyncFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.moneyscope.bankconnector.SyncHandler
+      CodeUri: ./target/bank-connector.jar
+      Runtime: java17
+      Timeout: 300
+      MemorySize: 1024
+      Environment:
+        Variables:
+          SPRING_PROFILES_ACTIVE: dev
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+Outputs:
+  WebhookFunction:
+    Description: "Webhook Function ARN"
+    Value:
+      Ref: WebhookFunction
+
+  SyncFunction:
+    Description: "Sync Function ARN"
+    Value:
+      Ref: SyncFunction
